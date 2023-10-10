@@ -1,0 +1,35 @@
+//@version=5
+indicator('ROE / PER', shorttitle='ROE / PER', precision=6, overlay=false)
+
+period = input.string(defval='FQ', title='Period', options=['FQ', 'FY'])
+
+// https://www.tradingview.com/pine-script-reference/v4/?solution=43000564727#fun_financial
+roe = request.financial(syminfo.tickerid, 'RETURN_ON_EQUITY', period)
+
+eps = request.financial(syminfo.tickerid, 'EARNINGS_PER_SHARE', 'TTM')
+per = close / eps
+
+roeper = roe / per
+
+bvps = request.financial(syminfo.tickerid, 'BOOK_VALUE_PER_SHARE', period)
+pbr = close / bvps
+
+roeper_color = color.orange
+if math.round(roeper) > 0
+    roeper_color := color.blue
+    roeper_color
+
+per_color = color.red
+if math.round(per) < 6 and math.round(per) > 0
+    per_color := color.green
+    per_color
+
+pbr_color = color.purple
+if math.round(pbr) < 2 and math.round(pbr) > 0
+    pbr_color := color.navy
+    pbr_color
+
+plot(roeper, title='ROE / PER', color=color.new(roeper_color, 0), linewidth=2, style=plot.style_linebr)
+plot(roe / 100, title='ROE', color=color.new(color.yellow, 0), linewidth=1, style=plot.style_linebr)
+plot(per, title='PER', color=color.new(per_color, 0), linewidth=1, style=plot.style_linebr)
+plot(pbr, title='PBR', color=color.new(pbr_color, 0), linewidth=1, style=plot.style_linebr)
